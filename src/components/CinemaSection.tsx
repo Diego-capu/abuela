@@ -207,6 +207,24 @@ export const CinemaSection: React.FC<CinemaSectionProps> = ({
           </div>
         )}
 
+        {/* Drive backup link when playing direct MP4 */}
+        {cinemaConfig.driveUrl && parsedVideo?.platform === 'direct' && (
+          <div className="mt-3 px-3 py-2 flex flex-col sm:flex-row items-center justify-between text-xs text-slate-400 bg-white/5 rounded-xl border border-white/10 gap-2">
+            <span className="text-[11px] text-slate-300">
+              ¿Quieres abrir o descargar el video original desde Google Drive?
+            </span>
+            <a
+              href={cinemaConfig.driveUrl}
+              target="_blank"
+              rel="noopener noreferrer"
+              className="inline-flex items-center gap-1.5 px-3 py-1 rounded-lg bg-amber-500/20 hover:bg-amber-500/30 text-amber-300 border border-amber-500/30 font-medium transition-colors"
+            >
+              <ExternalLink className="w-3.5 h-3.5" />
+              <span>Abrir en Google Drive ↗</span>
+            </a>
+          </div>
+        )}
+
         {/* Screen Bottom Bar / Caption */}
         {cinemaConfig.caption && (
           <div className="mt-3.5 px-3 py-2 text-center text-xs text-slate-400">

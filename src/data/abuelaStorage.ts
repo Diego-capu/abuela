@@ -84,8 +84,8 @@ export function getStoredPlaylist(): Track[] {
 
 export function getStoredCinema(): typeof CINEMA_CONFIG {
   const stored = safeGet(STORAGE_KEYS.CINEMA, CINEMA_CONFIG);
-  if ((!stored.videoUrl || stored.videoUrl === '') && CINEMA_CONFIG.videoUrl) {
-    return { ...stored, videoUrl: CINEMA_CONFIG.videoUrl };
+  if ((!stored.videoUrl || stored.videoUrl === '' || stored.videoUrl.includes('drive.google.com')) && CINEMA_CONFIG.videoUrl) {
+    return { ...stored, videoUrl: CINEMA_CONFIG.videoUrl, driveUrl: CINEMA_CONFIG.driveUrl };
   }
   return stored;
 }
