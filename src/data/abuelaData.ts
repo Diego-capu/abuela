@@ -378,7 +378,7 @@ export const CINEMA_CONFIG = {
   title: 'El Proyector de Recuerdos',
   subtitle: 'Revive los instantes más alegres de la Abuela Kata en movimiento.',
   tag: 'Sala Cinematográfica',
-  videoUrl: '', // Dejar vacío para mostrar poster elegante hasta que el usuario añada el video
+  videoUrl: 'https://drive.google.com/file/d/1SteVnGiIFaiEg57omUtYrQ5Lka46AU_O/view?usp=sharing',
   posterUrl: '/images/abuela/20191103_184529.jpg',
   caption: 'El tiempo pasa, pero las risas y los momentos juntos quedan inmortalizados para siempre.',
 };
