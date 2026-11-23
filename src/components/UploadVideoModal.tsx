@@ -20,6 +20,7 @@ export const UploadVideoModal: React.FC<UploadVideoModalProps> = ({
   const [title, setTitle] = useState('');
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [statusMsg, setStatusMsg] = useState<string | null>(null);
+  const [errorMsg, setErrorMsg] = useState<string | null>(null);
 
   if (!isOpen) return null;
 
@@ -31,6 +32,7 @@ export const UploadVideoModal: React.FC<UploadVideoModalProps> = ({
     e.preventDefault();
     if (!videoUrl.trim()) return;
 
+    setErrorMsg(null);
     const cleanTitle = title.trim() || 'Homenaje a Abuela Kata';
     const cleanUrl = videoUrl.trim();
     const parsed = parseVideoUrl(cleanUrl);
@@ -50,8 +52,12 @@ export const UploadVideoModal: React.FC<UploadVideoModalProps> = ({
           tag: 'Abuela Kata',
         });
         setStatusMsg('¡Guardado en la nube con éxito!');
-      } catch (err) {
-        console.warn('Error al sincronizar con Supabase:', err);
+      } catch (err: unknown) {
+        const msg = err instanceof Error ? err.message : 'Error desconocido al guardar en Supabase';
+        console.error('Error al sincronizar con Supabase:', err);
+        setErrorMsg(msg);
+        setIsSubmitting(false);
+        return;
       }
     }
 
@@ -59,7 +65,7 @@ export const UploadVideoModal: React.FC<UploadVideoModalProps> = ({
     setIsSubmitting(false);
     setTimeout(() => {
       onClose();
-    }, 400);
+    }, 500);
   };
 
   const handleVideoFile = (e: React.ChangeEvent<HTMLInputElement>) => {
@@ -92,12 +98,23 @@ export const UploadVideoModal: React.FC<UploadVideoModalProps> = ({
                 Cargar Video de la Abuela
               </h3>
             </div>
-            <button
-              onClick={onClose}
-              className="p-1 rounded-full text-slate-400 hover:text-slate-600 dark:hover:text-white cursor-pointer"
-            >
-              <X className="w-5 h-5" />
-            </button>
+            <div className="flex items-center gap-2">
+              {isSupabaseConfigured ? (
+                <span className="text-[10px] px-2 py-0.5 rounded-full bg-emerald-500/15 border border-emerald-500/30 text-emerald-600 dark:text-emerald-400 font-medium">
+                  ● Nube Conectada
+                </span>
+              ) : (
+                <span className="text-[10px] px-2 py-0.5 rounded-full bg-amber-500/15 border border-amber-500/30 text-amber-700 dark:text-amber-300 font-medium">
+                  ● Modo Local
+                </span>
+              )}
+              <button
+                onClick={onClose}
+                className="p-1 rounded-full text-slate-400 hover:text-slate-600 dark:hover:text-white cursor-pointer"
+              >
+                <X className="w-5 h-5" />
+              </button>
+            </div>
           </div>
 
           <form onSubmit={handleSubmit} className="space-y-4 text-xs">
@@ -165,6 +182,17 @@ export const UploadVideoModal: React.FC<UploadVideoModalProps> = ({
               <p>• <strong>YouTube</strong>: Enlaces normales o Shorts.</p>
               <p>• <strong>Google Drive</strong>: Enlace con acceso público ("Cualquiera con el enlace").</p>
             </div>
+
+            {/* Error Message */}
+            {errorMsg && (
+              <div className="p-3 rounded-2xl bg-rose-500/15 border border-rose-500/30 text-rose-800 dark:text-rose-300 text-xs flex items-start gap-2">
+                <AlertTriangle className="w-4 h-4 text-rose-600 shrink-0 mt-0.5" />
+                <div>
+                  <p className="font-semibold">Error al guardar en Supabase:</p>
+                  <p className="text-[11px] mt-0.5">{errorMsg}</p>
+                </div>
+              </div>
+            )}
 
             {/* Supabase status indicator */}
             {statusMsg && (
