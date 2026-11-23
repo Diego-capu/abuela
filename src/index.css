@@ -1,0 +1,144 @@
+@font-face {
+  font-family: 'HelvetiHand';
+  src: url('/fonts/HelvetiHand.ttf') format('truetype');
+  font-weight: 100 900;
+  font-style: normal;
+  font-display: swap;
+}
+
+@import "tailwindcss";
+
+@custom-variant dark (&:where(.dark, .dark *));
+
+@theme {
+  --font-serif: "HelvetiHand", Georgia, serif, cursive;
+  --font-sans: "HelvetiHand", system-ui, -apple-system, sans-serif, cursive;
+  --font-hand: "HelvetiHand", cursive, sans-serif;
+  --color-canvas: #faf8f5;
+  --color-canvas-subtle: #fbf9f4;
+  --color-ink: #0f172a;
+  --color-ink-muted: #475569;
+  --color-amber-primary: #d97706;
+  --color-amber-deep: #b45309;
+  --color-amber-soft: #fef3c7;
+  --color-sky-primary: #0284c7;
+}
+
+/* Global typography */
+html,
+body,
+button,
+input,
+select,
+textarea,
+h1,
+h2,
+h3,
+h4,
+h5,
+h6,
+p,
+span,
+a,
+li,
+div {
+  font-family: 'HelvetiHand', "Segoe UI", Tahoma, Geneva, Verdana, sans-serif;
+}
+
+body {
+  letter-spacing: 0.02em;
+  padding-bottom: env(safe-area-inset-bottom);
+}
+
+.font-hand,
+.font-sans,
+.font-serif {
+  font-family: 'HelvetiHand', cursive, sans-serif;
+}
+
+@layer utilities {
+  /* Frosted liquid glass with warm amber/gold and subtle blue reflection */
+  .liquid-glass {
+    background: rgba(255, 255, 255, 0.85);
+    backdrop-filter: blur(20px);
+    -webkit-backdrop-filter: blur(20px);
+    border: 1px solid rgba(251, 191, 36, 0.35);
+    box-shadow: 
+      0 12px 30px -4px rgba(217, 119, 6, 0.05),
+      0 4px 12px -2px rgba(15, 23, 42, 0.03),
+      inset 0 1px 0 rgba(255, 255, 255, 0.95);
+  }
+
+  .dark .liquid-glass {
+    background: rgba(11, 20, 36, 0.82);
+    backdrop-filter: blur(20px);
+    -webkit-backdrop-filter: blur(20px);
+    border: 1px solid rgba(251, 191, 36, 0.2);
+    box-shadow: 
+      0 15px 35px -5px rgba(0, 0, 0, 0.5),
+      0 4px 12px -2px rgba(0, 0, 0, 0.3),
+      inset 0 1px 0 rgba(255, 255, 255, 0.08);
+  }
+
+  .liquid-glass-subtle {
+    background: rgba(255, 255, 255, 0.65);
+    backdrop-filter: blur(16px);
+    -webkit-backdrop-filter: blur(16px);
+    border: 1px solid rgba(251, 191, 36, 0.25);
+  }
+
+  .dark .liquid-glass-subtle {
+    background: rgba(11, 20, 36, 0.58);
+    backdrop-filter: blur(16px);
+    -webkit-backdrop-filter: blur(16px);
+    border: 1px solid rgba(255, 255, 255, 0.08);
+  }
+
+  .liquid-pill {
+    background: rgba(255, 255, 255, 0.92);
+    backdrop-filter: blur(24px);
+    -webkit-backdrop-filter: blur(24px);
+    border: 1px solid rgba(245, 158, 11, 0.4);
+    box-shadow: 
+      0 10px 25px -4px rgba(217, 119, 6, 0.08),
+      inset 0 1px 0 rgba(255, 255, 255, 1);
+  }
+
+  .dark .liquid-pill {
+    background: rgba(12, 22, 38, 0.92);
+    backdrop-filter: blur(24px);
+    -webkit-backdrop-filter: blur(24px);
+    border: 1px solid rgba(251, 191, 36, 0.25);
+    box-shadow: 
+      0 10px 25px -4px rgba(0, 0, 0, 0.55),
+      inset 0 1px 0 rgba(255, 255, 255, 0.12);
+  }
+}
+
+/* Custom scrollbar in warm amber */
+::-webkit-scrollbar {
+  width: 6px;
+}
+::-webkit-scrollbar-track {
+  background: #faf8f5;
+}
+::-webkit-scrollbar-thumb {
+  background: rgba(217, 119, 6, 0.35);
+  border-radius: 9999px;
+}
+::-webkit-scrollbar-thumb:hover {
+  background: rgba(217, 119, 6, 0.6);
+}
+
+.dark::-webkit-scrollbar-track,
+.dark ::-webkit-scrollbar-track {
+  background: #070d18;
+}
+.dark::-webkit-scrollbar-thumb,
+.dark ::-webkit-scrollbar-thumb {
+  background: rgba(251, 191, 36, 0.25);
+}
+.dark::-webkit-scrollbar-thumb:hover,
+.dark ::-webkit-scrollbar-thumb:hover {
+  background: rgba(251, 191, 36, 0.45);
+}
