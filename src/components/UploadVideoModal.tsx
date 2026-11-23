@@ -1,7 +1,9 @@
 import React, { useState } from 'react';
 import { createPortal } from 'react-dom';
 import { motion, AnimatePresence } from 'framer-motion';
-import { Film, X, Check, Video as VideoIcon, AlertTriangle, FileVideo } from 'lucide-react';
+import { Film, X, Check, Video as VideoIcon, AlertTriangle, FileVideo, Loader2, Cloud } from 'lucide-react';
+import { isSupabaseConfigured, addVideoToSupabase } from '../lib/supabase';
+import { parseVideoUrl } from '../utils/videoParser';
 
 interface UploadVideoModalProps {
   isOpen: boolean;
@@ -16,6 +18,8 @@ export const UploadVideoModal: React.FC<UploadVideoModalProps> = ({
 }) => {
   const [videoUrl, setVideoUrl] = useState('');
   const [title, setTitle] = useState('');
+  const [isSubmitting, setIsSubmitting] = useState(false);
+  const [statusMsg, setStatusMsg] = useState<string | null>(null);
 
   if (!isOpen) return null;
 
@@ -23,11 +27,39 @@ export const UploadVideoModal: React.FC<UploadVideoModalProps> = ({
     videoUrl.includes('photos.app.goo.gl') ||
     videoUrl.includes('photos.google.com');
 
-  const handleSubmit = (e: React.FormEvent) => {
+  const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     if (!videoUrl.trim()) return;
-    onSave(videoUrl.trim(), title.trim());
-    onClose();
+
+    const cleanTitle = title.trim() || 'Homenaje a Abuela Kata';
+    const cleanUrl = videoUrl.trim();
+    const parsed = parseVideoUrl(cleanUrl);
+
+    setIsSubmitting(true);
+    setStatusMsg(isSupabaseConfigured ? 'Guardando en la nube (Supabase)...' : null);
+
+    if (isSupabaseConfigured) {
+      try {
+        await addVideoToSupabase({
+          title: cleanTitle,
+          author: 'Familia',
+          videoUrl: parsed?.directUrl || cleanUrl,
+          platform: parsed?.platform || 'drive',
+          embedUrl: parsed?.embedUrl || cleanUrl,
+          thumbnailUrl: parsed?.thumbnailUrl,
+          tag: 'Abuela Kata',
+        });
+        setStatusMsg('¡Guardado en la nube con éxito!');
+      } catch (err) {
+        console.warn('Error al sincronizar con Supabase:', err);
+      }
+    }
+
+    onSave(cleanUrl, cleanTitle);
+    setIsSubmitting(false);
+    setTimeout(() => {
+      onClose();
+    }, 400);
   };
 
   const handleVideoFile = (e: React.ChangeEvent<HTMLInputElement>) => {
@@ -134,6 +166,14 @@ export const UploadVideoModal: React.FC<UploadVideoModalProps> = ({
               <p>• <strong>Google Drive</strong>: Enlace con acceso público ("Cualquiera con el enlace").</p>
             </div>
 
+            {/* Supabase status indicator */}
+            {statusMsg && (
+              <div className="p-2.5 rounded-xl bg-amber-500/15 border border-amber-500/30 text-amber-800 dark:text-amber-300 text-xs flex items-center gap-2">
+                <Cloud className="w-4 h-4 animate-pulse" />
+                <span>{statusMsg}</span>
+              </div>
+            )}
+
             {/* Quick sample button */}
             <div className="flex items-center justify-between pt-1">
               <button
@@ -155,10 +195,20 @@ export const UploadVideoModal: React.FC<UploadVideoModalProps> = ({
                 </button>
                 <button
                   type="submit"
-                  className="px-4 py-2 rounded-xl bg-amber-500 hover:bg-amber-600 text-white font-medium flex items-center gap-1.5 shadow-md cursor-pointer"
+                  disabled={isSubmitting}
+                  className="px-4 py-2 rounded-xl bg-amber-500 hover:bg-amber-600 disabled:opacity-50 text-white font-medium flex items-center gap-1.5 shadow-md cursor-pointer"
                 >
-                  <Check className="w-4 h-4" />
-                  <span>Guardar</span>
+                  {isSubmitting ? (
+                    <>
+                      <Loader2 className="w-4 h-4 animate-spin" />
+                      <span>Guardando...</span>
+                    </>
+                  ) : (
+                    <>
+                      <Check className="w-4 h-4" />
+                      <span>Guardar</span>
+                    </>
+                  )}
                 </button>
               </div>
             </div>

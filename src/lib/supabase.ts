@@ -178,7 +178,7 @@ export interface RemoteSquadVideo {
   title: string;
   author: string;
   video_url: string;
-  platform: 'youtube' | 'drive';
+  platform: string;
   embed_url: string;
   thumbnail_url?: string;
   tag: string;
@@ -219,12 +219,12 @@ export async function addVideoToSupabase({
   platform,
   embedUrl,
   thumbnailUrl,
-  tag = 'Momentos',
+  tag = 'Abuela Kata',
 }: {
   title: string;
   author?: string;
   videoUrl: string;
-  platform: 'youtube' | 'drive';
+  platform: string;
   embedUrl: string;
   thumbnailUrl?: string;
   tag?: string;
@@ -240,12 +240,12 @@ export async function addVideoToSupabase({
     .insert([
       {
         title: title.trim(),
-        author: author?.trim() || 'Squad',
+        author: author?.trim() || 'Familia',
         video_url: videoUrl.trim(),
         platform,
         embed_url: embedUrl.trim(),
         thumbnail_url: thumbnailUrl || null,
-        tag: tag.trim() || 'Momentos',
+        tag: tag.trim() || 'Abuela Kata',
       },
     ])
     .select('id, title, author, video_url, platform, embed_url, thumbnail_url, tag, created_at')

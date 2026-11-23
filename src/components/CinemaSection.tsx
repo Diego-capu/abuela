@@ -1,9 +1,10 @@
-import React, { useState, useMemo } from 'react';
+import React, { useState, useMemo, useEffect } from 'react';
 import { motion } from 'framer-motion';
 import { Play, Video, Pencil, ExternalLink, AlertTriangle, Upload } from 'lucide-react';
 import { CINEMA_CONFIG } from '../data/abuelaData';
 import { UploadVideoModal } from './UploadVideoModal';
 import { parseVideoUrl } from '../utils/videoParser';
+import { isSupabaseConfigured, fetchRemoteVideos } from '../lib/supabase';
 
 interface CinemaSectionProps {
   cinemaConfig: typeof CINEMA_CONFIG;
@@ -18,6 +19,32 @@ export const CinemaSection: React.FC<CinemaSectionProps> = ({
 }) => {
   const [isPlaying, setIsPlaying] = useState(false);
   const [modalOpen, setModalOpen] = useState(false);
+
+  // Sync latest video from Supabase on mount across all family devices
+  useEffect(() => {
+    let isMounted = true;
+    if (isSupabaseConfigured) {
+      fetchRemoteVideos()
+        .then((remoteRecords) => {
+          if (!isMounted || !remoteRecords || remoteRecords.length === 0) return;
+          const matching =
+            remoteRecords.find((v) => v.tag === 'Abuela Kata') || remoteRecords[0];
+          if (matching && matching.video_url && matching.video_url !== cinemaConfig.videoUrl) {
+            onUpdateCinema?.({
+              ...cinemaConfig,
+              videoUrl: matching.video_url,
+              title: matching.title || cinemaConfig.title,
+            });
+          }
+        })
+        .catch((err) => {
+          console.warn('Error fetching Supabase videos in CinemaSection:', err);
+        });
+    }
+    return () => {
+      isMounted = false;
+    };
+  }, []);
 
   const parsedVideo = useMemo(() => {
     return parseVideoUrl(cinemaConfig.videoUrl);
