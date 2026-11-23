@@ -80,8 +80,7 @@ export const CinemaSection: React.FC<CinemaSectionProps> = ({
                   Enlace de Google Fotos Detectado
                 </h3>
                 <p className="text-xs sm:text-sm text-slate-300 max-w-lg mb-6 leading-relaxed">
-                  Por políticas de seguridad y privacidad de Google, los enlaces de Google Fotos no permiten
-                  la reproducción embebida directa dentro de páginas web externas (error de bloqueo de marco).
+                  Google Fotos no permite reproducir videos embebidos en webs externas por políticas de seguridad (X-Frame-Options).
                 </p>
 
                 <div className="flex flex-col sm:flex-row items-center gap-3">
@@ -106,19 +105,22 @@ export const CinemaSection: React.FC<CinemaSectionProps> = ({
               </div>
             ) : parsedVideo?.platform === 'youtube' || parsedVideo?.platform === 'drive' ? (
               /* YouTube or Google Drive Iframe */
-              <iframe
-                src={parsedVideo.embedUrl}
-                title={cinemaConfig.title}
-                allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share"
-                allowFullScreen
-                className="w-full h-full border-0"
-              />
+              <div className="relative w-full h-full flex flex-col">
+                <iframe
+                  src={parsedVideo.embedUrl}
+                  title={cinemaConfig.title}
+                  allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share"
+                  allowFullScreen
+                  className="w-full h-full border-0 flex-1"
+                />
+              </div>
             ) : (
               /* Direct HTML5 Video (.mp4, blob:, etc.) */
               <video
                 src={cinemaConfig.videoUrl}
                 controls
                 autoPlay
+                playsInline
                 className="w-full h-full object-contain"
               />
             )
@@ -150,13 +152,33 @@ export const CinemaSection: React.FC<CinemaSectionProps> = ({
                 </h3>
                 <p className="text-xs sm:text-sm text-slate-300 max-w-md font-light leading-relaxed">
                   {cinemaConfig.videoUrl
-                    ? 'Toca para iniciar la reproducción'
+                    ? 'Toca el botón para iniciar la reproducción'
                     : 'Toca el botón para cargar el video en MP4, YouTube o Google Drive.'}
                 </p>
               </div>
             </div>
           )}
         </div>
+
+        {/* External direct link bar if Drive or YouTube is active */}
+        {cinemaConfig.videoUrl && parsedVideo && (parsedVideo.platform === 'drive' || parsedVideo.platform === 'youtube') && (
+          <div className="mt-3 px-3 py-2 flex flex-col sm:flex-row items-center justify-between text-xs text-slate-400 bg-white/5 rounded-xl border border-white/10 gap-2">
+            <span className="text-[11px] text-slate-300">
+              {parsedVideo.platform === 'drive'
+                ? '¿Problemas en tu teléfono? Puedes ver el video directamente en Drive:'
+                : '¿Prefieres abrirlo en YouTube?'}
+            </span>
+            <a
+              href={parsedVideo.directUrl}
+              target="_blank"
+              rel="noopener noreferrer"
+              className="inline-flex items-center gap-1.5 px-3 py-1 rounded-lg bg-amber-500/20 hover:bg-amber-500/30 text-amber-300 border border-amber-500/30 font-medium transition-colors"
+            >
+              <ExternalLink className="w-3.5 h-3.5" />
+              <span>Abrir en {parsedVideo.platform === 'drive' ? 'Google Drive' : 'YouTube'} ↗</span>
+            </a>
+          </div>
+        )}
 
         {/* Screen Bottom Bar / Caption */}
         {cinemaConfig.caption && (
