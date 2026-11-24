@@ -1,8 +1,9 @@
 import React, { useState, useEffect } from 'react';
 import { createPortal } from 'react-dom';
 import { motion, AnimatePresence } from 'framer-motion';
-import { Heart, X, Check, Image as ImageIcon } from 'lucide-react';
+import { Heart, X, Check, Image as ImageIcon, Loader2 } from 'lucide-react';
 import type { FamilyAvatar } from '../data/abuelaData';
+import { compressImage } from '../utils/imageCompressor';
 
 interface EditAvatarRoleModalProps {
   isOpen: boolean;
@@ -22,6 +23,7 @@ export const EditAvatarRoleModal: React.FC<EditAvatarRoleModalProps> = ({
   const [role, setRole] = useState('');
   const [message, setMessage] = useState('');
   const [avatarUrl, setAvatarUrl] = useState('');
+  const [isCompressing, setIsCompressing] = useState(false);
 
   useEffect(() => {
     if (avatar) {
@@ -48,16 +50,18 @@ export const EditAvatarRoleModal: React.FC<EditAvatarRoleModalProps> = ({
     onClose();
   };
 
-  const handleImageFile = (e: React.ChangeEvent<HTMLInputElement>) => {
+  const handleImageFile = async (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0];
     if (file) {
-      const reader = new FileReader();
-      reader.onload = () => {
-        if (typeof reader.result === 'string') {
-          setAvatarUrl(reader.result);
-        }
-      };
-      reader.readAsDataURL(file);
+      try {
+        setIsCompressing(true);
+        const optimized = await compressImage(file, 1600, 1600, 0.82);
+        setAvatarUrl(optimized);
+      } catch (err) {
+        console.error('Error optimizando foto de avatar:', err);
+      } finally {
+        setIsCompressing(false);
+      }
     }
   };
 
@@ -152,11 +156,21 @@ export const EditAvatarRoleModal: React.FC<EditAvatarRoleModalProps> = ({
                   className="flex-1 px-3 py-2 rounded-xl bg-white/70 dark:bg-slate-900/60 border border-amber-200 dark:border-white/10 text-slate-900 dark:text-white"
                 />
                 <label className="px-3 py-2 rounded-xl bg-amber-500/15 hover:bg-amber-500/25 text-amber-800 dark:text-amber-300 border border-amber-300/40 cursor-pointer flex items-center gap-1 shrink-0 font-medium">
-                  <ImageIcon className="w-3.5 h-3.5" />
-                  <span>Subir</span>
+                  {isCompressing ? (
+                    <>
+                      <Loader2 className="w-3.5 h-3.5 animate-spin text-amber-600" />
+                      <span>Optimizando...</span>
+                    </>
+                  ) : (
+                    <>
+                      <ImageIcon className="w-3.5 h-3.5" />
+                      <span>Subir</span>
+                    </>
+                  )}
                   <input
                     type="file"
                     accept="image/*"
+                    disabled={isCompressing}
                     onChange={handleImageFile}
                     className="hidden"
                   />
@@ -174,7 +188,8 @@ export const EditAvatarRoleModal: React.FC<EditAvatarRoleModalProps> = ({
               </button>
               <button
                 type="submit"
-                className="px-4 py-2 rounded-xl bg-amber-500 hover:bg-amber-600 text-white font-medium flex items-center gap-1.5 shadow-md cursor-pointer"
+                disabled={isCompressing}
+                className="px-4 py-2 rounded-xl bg-amber-500 hover:bg-amber-600 text-white font-medium flex items-center gap-1.5 shadow-md cursor-pointer disabled:opacity-50"
               >
                 <Check className="w-4 h-4" />
                 <span>Guardar Mensaje</span>

@@ -2,26 +2,67 @@ import { createClient, type SupabaseClient } from '@supabase/supabase-js';
 
 const env = import.meta.env as Record<string, string | undefined>;
 
-const supabaseUrl =
-  env.VITE_SUPABASE_URL ||
-  env.SUPABASE_URL ||
-  env.NEXT_PUBLIC_SUPABASE_URL;
+export function getActiveSupabaseUrl(): string {
+  if (typeof window !== 'undefined') {
+    const custom = localStorage.getItem('abuela_custom_supabase_url');
+    if (custom) return custom.trim();
+  }
+  return (
+    env.VITE_SUPABASE_URL ||
+    env.SUPABASE_URL ||
+    env.NEXT_PUBLIC_SUPABASE_URL ||
+    ''
+  ).trim();
+}
 
-const supabaseAnonKey =
-  env.VITE_SUPABASE_ANON_KEY ||
-  env.SUPABASE_ANON_KEY ||
-  env.NEXT_PUBLIC_SUPABASE_ANON_KEY;
+export function getActiveSupabaseAnonKey(): string {
+  if (typeof window !== 'undefined') {
+    const custom = localStorage.getItem('abuela_custom_supabase_anon_key');
+    if (custom) return custom.trim();
+  }
+  return (
+    env.VITE_SUPABASE_ANON_KEY ||
+    env.SUPABASE_ANON_KEY ||
+    env.NEXT_PUBLIC_SUPABASE_ANON_KEY ||
+    ''
+  ).trim();
+}
 
-export const isSupabaseConfigured = Boolean(
-  supabaseUrl &&
-    supabaseAnonKey &&
-    supabaseUrl.startsWith('https://') &&
-    !supabaseUrl.includes('your-project-id')
-);
+function initSupabase(): SupabaseClient | null {
+  const url = getActiveSupabaseUrl();
+  const key = getActiveSupabaseAnonKey();
+  if (url && key && url.startsWith('https://') && !url.includes('your-project-id')) {
+    try {
+      return createClient(url, key);
+    } catch (e) {
+      console.warn('Error al inicializar Supabase:', e);
+      return null;
+    }
+  }
+  return null;
+}
 
-export const supabase: SupabaseClient | null = isSupabaseConfigured
-  ? createClient(supabaseUrl!, supabaseAnonKey!)
-  : null;
+export let supabase: SupabaseClient | null = initSupabase();
+export let isSupabaseConfigured = Boolean(supabase);
+
+export function configureSupabaseCredentials(url: string, anonKey: string): boolean {
+  if (typeof window !== 'undefined') {
+    localStorage.setItem('abuela_custom_supabase_url', url.trim());
+    localStorage.setItem('abuela_custom_supabase_anon_key', anonKey.trim());
+  }
+  supabase = initSupabase();
+  isSupabaseConfigured = Boolean(supabase);
+  return isSupabaseConfigured;
+}
+
+export function removeCustomSupabaseCredentials(): void {
+  if (typeof window !== 'undefined') {
+    localStorage.removeItem('abuela_custom_supabase_url');
+    localStorage.removeItem('abuela_custom_supabase_anon_key');
+  }
+  supabase = initSupabase();
+  isSupabaseConfigured = Boolean(supabase);
+}
 
 export interface RemotePlaylistTrack {
   id: string;

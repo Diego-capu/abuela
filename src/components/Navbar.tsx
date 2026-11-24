@@ -1,14 +1,21 @@
 import React, { useState, useEffect } from 'react';
-import { Edit3, Check } from 'lucide-react';
+import { Edit3, Check, CloudCheck, CloudOff } from 'lucide-react';
 import { AudioPlayer } from './AudioPlayer';
 import { ThemeToggle } from './ThemeToggle';
 
 interface NavbarProps {
   editMode?: boolean;
   onToggleEditMode?: () => void;
+  isCloudConnected?: boolean;
+  onOpenCloudSync?: () => void;
 }
 
-export const Navbar: React.FC<NavbarProps> = ({ editMode = false, onToggleEditMode }) => {
+export const Navbar: React.FC<NavbarProps> = ({
+  editMode = false,
+  onToggleEditMode,
+  isCloudConnected = false,
+  onOpenCloudSync,
+}) => {
   const [scrolled, setScrolled] = useState(false);
 
   useEffect(() => {
@@ -44,8 +51,37 @@ export const Navbar: React.FC<NavbarProps> = ({ editMode = false, onToggleEditMo
           </span>
         </a>
 
-        {/* Actions (Sound toggle, Theme toggle, Edit mode) */}
-        <div className="flex items-center gap-2">
+        {/* Actions (Sound toggle, Theme toggle, Edit mode, Cloud sync) */}
+        <div className="flex items-center gap-1.5 sm:gap-2">
+          {/* Cloud Sync Status Button */}
+          {onOpenCloudSync && (
+            <button
+              onClick={onOpenCloudSync}
+              title={
+                isCloudConnected
+                  ? 'Sincronizado en la nube (Supabase)'
+                  : 'Modo Local (Clic para conectar Supabase)'
+              }
+              className={`p-1.5 rounded-full border transition-all cursor-pointer flex items-center gap-1 text-xs px-2.5 ${
+                isCloudConnected
+                  ? 'bg-emerald-500/15 text-emerald-700 dark:text-emerald-300 border-emerald-300/60 dark:border-emerald-500/30 hover:bg-emerald-500/25'
+                  : 'bg-white/80 dark:bg-white/10 text-slate-700 dark:text-slate-300 border-amber-200/60 dark:border-white/10 hover:border-amber-400'
+              }`}
+            >
+              {isCloudConnected ? (
+                <>
+                  <CloudCheck className="w-3.5 h-3.5 text-emerald-600 dark:text-emerald-400" />
+                  <span className="text-[11px] font-medium hidden md:inline">Nube</span>
+                </>
+              ) : (
+                <>
+                  <CloudOff className="w-3.5 h-3.5 text-amber-600 dark:text-amber-400" />
+                  <span className="text-[11px] font-medium hidden md:inline">Local</span>
+                </>
+              )}
+            </button>
+          )}
+
           {/* Edit Mode Toggle */}
           {onToggleEditMode && (
             <button

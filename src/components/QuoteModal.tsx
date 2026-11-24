@@ -1,8 +1,9 @@
 import React, { useState, useEffect } from 'react';
 import { createPortal } from 'react-dom';
 import { motion, AnimatePresence } from 'framer-motion';
-import { MessageSquareQuote, X, Check, Image as ImageIcon } from 'lucide-react';
+import { MessageSquareQuote, X, Check, Image as ImageIcon, Loader2 } from 'lucide-react';
 import type { Quote } from '../data/abuelaData';
+import { compressImage } from '../utils/imageCompressor';
 
 interface QuoteModalProps {
   isOpen: boolean;
@@ -25,6 +26,7 @@ export const QuoteModal: React.FC<QuoteModalProps> = ({
   const [context, setContext] = useState('');
   const [category, setCategory] = useState<'Bendición' | 'Cocina' | 'Consejo' | 'Amor'>('Bendición');
   const [imageUrl, setImageUrl] = useState('/images/abuela/20191103_184529.jpg');
+  const [isCompressing, setIsCompressing] = useState(false);
 
   useEffect(() => {
     if (quoteToEdit) {
@@ -64,16 +66,18 @@ export const QuoteModal: React.FC<QuoteModalProps> = ({
     onClose();
   };
 
-  const handleImageFile = (e: React.ChangeEvent<HTMLInputElement>) => {
+  const handleImageFile = async (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0];
     if (file) {
-      const reader = new FileReader();
-      reader.onload = () => {
-        if (typeof reader.result === 'string') {
-          setImageUrl(reader.result);
-        }
-      };
-      reader.readAsDataURL(file);
+      try {
+        setIsCompressing(true);
+        const optimized = await compressImage(file, 1600, 1600, 0.82);
+        setImageUrl(optimized);
+      } catch (err) {
+        console.error('Error optimizando foto:', err);
+      } finally {
+        setIsCompressing(false);
+      }
     }
   };
 
@@ -172,11 +176,21 @@ export const QuoteModal: React.FC<QuoteModalProps> = ({
                   className="flex-1 px-3 py-2 rounded-xl bg-white/70 dark:bg-slate-900/60 border border-amber-200 dark:border-white/10 text-slate-900 dark:text-white"
                 />
                 <label className="px-3 py-2 rounded-xl bg-amber-500/15 hover:bg-amber-500/25 text-amber-800 dark:text-amber-300 border border-amber-300/40 cursor-pointer flex items-center gap-1 shrink-0">
-                  <ImageIcon className="w-3.5 h-3.5" />
-                  <span>Subir</span>
+                  {isCompressing ? (
+                    <>
+                      <Loader2 className="w-3.5 h-3.5 animate-spin text-amber-600" />
+                      <span>Optimizando...</span>
+                    </>
+                  ) : (
+                    <>
+                      <ImageIcon className="w-3.5 h-3.5" />
+                      <span>Subir</span>
+                    </>
+                  )}
                   <input
                     type="file"
                     accept="image/*"
+                    disabled={isCompressing}
                     onChange={handleImageFile}
                     className="hidden"
                   />
@@ -194,7 +208,8 @@ export const QuoteModal: React.FC<QuoteModalProps> = ({
               </button>
               <button
                 type="submit"
-                className="px-4 py-2 rounded-xl bg-amber-500 hover:bg-amber-600 text-white font-medium flex items-center gap-1.5 shadow-md cursor-pointer"
+                disabled={isCompressing}
+                className="px-4 py-2 rounded-xl bg-amber-500 hover:bg-amber-600 text-white font-medium flex items-center gap-1.5 shadow-md cursor-pointer disabled:opacity-50"
               >
                 <Check className="w-4 h-4" />
                 <span>Guardar</span>

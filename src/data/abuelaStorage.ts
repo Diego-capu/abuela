@@ -15,8 +15,9 @@ import {
   type FamilyAvatar,
   type Track,
 } from './abuelaData';
+import { idbGet, idbSet, idbClear } from './idbStorage';
 
-const STORAGE_KEYS = {
+export const STORAGE_KEYS = {
   SITE: 'abuela_site_config',
   MANIFESTO: 'abuela_manifesto',
   CHAPTERS: 'abuela_chapters',
@@ -26,7 +27,7 @@ const STORAGE_KEYS = {
   AVATARS: 'abuela_avatars',
   PLAYLIST: 'abuela_playlist',
   CINEMA: 'abuela_cinema',
-};
+} as const;
 
 function safeGet<T>(key: string, fallback: T): T {
   try {
@@ -40,15 +41,69 @@ function safeGet<T>(key: string, fallback: T): T {
 }
 
 function safeSet<T>(key: string, value: T): void {
+  // 1. Always attempt asynchronous write to IndexedDB (virtually unlimited quota)
+  idbSet(key, value).catch((err) => {
+    console.warn(`IndexedDB background write issue for ${key}:`, err);
+  });
+
+  // 2. Also attempt localStorage for synchronous fast retrieval on page boot
   try {
     localStorage.setItem(key, JSON.stringify(value));
   } catch (e) {
-    console.error(`Error saving to localStorage for ${key}`, e);
+    // If localStorage quota (5MB) is exceeded, IndexedDB has already persisted it
+    console.warn(`localStorage quota warning for ${key} (stored safely in IndexedDB):`, e);
   }
 }
 
 // ----------------------------------------------------------------------------
-// GETTERS
+// ASYNC HYDRATION FROM INDEXEDDB
+// ----------------------------------------------------------------------------
+export interface HydratedStorageData {
+  siteConfig: typeof SITE_CONFIG | null;
+  manifesto: typeof MANIFESTO_DATA | null;
+  chapters: Chapter[] | null;
+  pillars: Pillar[] | null;
+  quotes: Quote[] | null;
+  gallery: GalleryPhoto[] | null;
+  avatars: FamilyAvatar[] | null;
+  cinema: typeof CINEMA_CONFIG | null;
+}
+
+export async function hydrateFromStorage(): Promise<HydratedStorageData> {
+  const [
+    siteConfig,
+    manifesto,
+    chapters,
+    pillars,
+    quotes,
+    gallery,
+    avatars,
+    cinema,
+  ] = await Promise.all([
+    idbGet<typeof SITE_CONFIG>(STORAGE_KEYS.SITE),
+    idbGet<typeof MANIFESTO_DATA>(STORAGE_KEYS.MANIFESTO),
+    idbGet<Chapter[]>(STORAGE_KEYS.CHAPTERS),
+    idbGet<Pillar[]>(STORAGE_KEYS.PILLARS),
+    idbGet<Quote[]>(STORAGE_KEYS.QUOTES),
+    idbGet<GalleryPhoto[]>(STORAGE_KEYS.GALLERY),
+    idbGet<FamilyAvatar[]>(STORAGE_KEYS.AVATARS),
+    idbGet<typeof CINEMA_CONFIG>(STORAGE_KEYS.CINEMA),
+  ]);
+
+  return {
+    siteConfig,
+    manifesto,
+    chapters,
+    pillars,
+    quotes,
+    gallery,
+    avatars,
+    cinema,
+  };
+}
+
+// ----------------------------------------------------------------------------
+// SYNCHRONOUS GETTERS (Initial State)
 // ----------------------------------------------------------------------------
 export function getStoredSiteConfig(): typeof SITE_CONFIG {
   return safeGet(STORAGE_KEYS.SITE, SITE_CONFIG);
@@ -136,4 +191,5 @@ export function resetAllToDefaults(): void {
   Object.values(STORAGE_KEYS).forEach((key) => {
     localStorage.removeItem(key);
   });
+  idbClear().catch(console.warn);
 }
