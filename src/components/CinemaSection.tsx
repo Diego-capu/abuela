@@ -1,10 +1,11 @@
 import React, { useState, useMemo, useEffect } from 'react';
 import { motion } from 'framer-motion';
-import { Play, Video, Pencil, ExternalLink, AlertTriangle, Upload } from 'lucide-react';
+import { Play, Video, Pencil, ExternalLink, AlertTriangle, Upload, ZoomIn } from 'lucide-react';
 import { CINEMA_CONFIG } from '../data/abuelaData';
 import { UploadVideoModal } from './UploadVideoModal';
 import { parseVideoUrl } from '../utils/videoParser';
 import { isSupabaseConfigured, fetchRemoteVideos } from '../lib/supabase';
+import { useImageViewer } from '../context/ImageViewerContext';
 
 interface CinemaSectionProps {
   cinemaConfig: typeof CINEMA_CONFIG;
@@ -17,6 +18,7 @@ export const CinemaSection: React.FC<CinemaSectionProps> = ({
   editMode = false,
   onUpdateCinema,
 }) => {
+  const { openImageViewer } = useImageViewer();
   const [isPlaying, setIsPlaying] = useState(false);
   const [modalOpen, setModalOpen] = useState(false);
 
@@ -153,12 +155,31 @@ export const CinemaSection: React.FC<CinemaSectionProps> = ({
             )
           ) : (
             /* POSTER / FACADE VIEW BEFORE PLAYING */
-            <div className="relative w-full h-full">
+            <div className="relative w-full h-full group">
               <img
                 src={cinemaConfig.posterUrl}
                 alt="Poster Sala de Cine"
                 className="w-full h-full object-cover filter brightness-[0.7] contrast-[1.05]"
               />
+
+              {/* View Poster in Real Size Button */}
+              <button
+                onClick={() =>
+                  openImageViewer({
+                    src: cinemaConfig.posterUrl,
+                    alt: 'Poster Sala de Cine',
+                    title: cinemaConfig.title,
+                    subtitle: 'Poster Oficial del Proyector',
+                    caption: cinemaConfig.caption,
+                  })
+                }
+                className="absolute top-3 right-3 p-2 rounded-xl bg-black/60 hover:bg-amber-500 text-white transition-all shadow-md cursor-pointer flex items-center gap-1.5 text-xs z-10"
+                title="Ver foto del poster en tamaño real"
+              >
+                <ZoomIn className="w-3.5 h-3.5 text-amber-300" />
+                <span className="hidden sm:inline">Ver foto en tamaño real</span>
+              </button>
+
               <div className="absolute inset-0 bg-gradient-to-t from-slate-950/90 via-slate-950/40 to-transparent flex flex-col items-center justify-center p-6 text-center text-white">
                 <button
                   onClick={() => {

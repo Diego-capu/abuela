@@ -1,8 +1,9 @@
 import React, { useState } from 'react';
 import { motion } from 'framer-motion';
-import { Users, Heart, Pencil } from 'lucide-react';
+import { Users, Heart, Pencil, ZoomIn } from 'lucide-react';
 import type { FamilyAvatar } from '../data/abuelaData';
 import { EditAvatarRoleModal } from './EditAvatarRoleModal';
+import { useImageViewer } from '../context/ImageViewerContext';
 
 interface AvatarsSectionProps {
   avatars: FamilyAvatar[];
@@ -15,7 +16,19 @@ export const AvatarsSection: React.FC<AvatarsSectionProps> = ({
   editMode = false,
   onUpdateAvatars,
 }) => {
+  const { openImageViewer } = useImageViewer();
   const [selectedAvatar, setSelectedAvatar] = useState<FamilyAvatar | null>(null);
+
+  const handleOpenPhoto = (av: FamilyAvatar, e?: React.MouseEvent) => {
+    e?.stopPropagation();
+    openImageViewer({
+      src: av.avatarUrl,
+      alt: av.name,
+      title: av.name,
+      subtitle: `${av.role} • ${av.relation}`,
+      caption: `«${av.message}»`,
+    });
+  };
 
   const handleSave = (updated: FamilyAvatar) => {
     const list = avatars.map((a) => (a.id === updated.id ? updated : a));
@@ -52,12 +65,19 @@ export const AvatarsSection: React.FC<AvatarsSectionProps> = ({
             <div>
               {/* Header with Avatar and Role */}
               <div className="flex items-center gap-3.5 mb-4">
-                <div className="relative w-14 h-14 rounded-2xl overflow-hidden bg-slate-200 dark:bg-slate-800 border-2 border-amber-400 shadow-sm group-hover:scale-105 transition-transform">
+                <div
+                  onClick={(e) => handleOpenPhoto(av, e)}
+                  className="relative w-14 h-14 rounded-2xl overflow-hidden bg-slate-200 dark:bg-slate-800 border-2 border-amber-400 shadow-sm group-hover:scale-105 transition-transform cursor-zoom-in group/avatar"
+                  title="Toca para ver la foto en tamaño real"
+                >
                   <img
                     src={av.avatarUrl}
                     alt={av.name}
                     className="w-full h-full object-cover"
                   />
+                  <div className="absolute inset-0 bg-black/40 opacity-0 group-hover/avatar:opacity-100 transition-opacity flex items-center justify-center">
+                    <ZoomIn className="w-4 h-4 text-amber-300" />
+                  </div>
                 </div>
                 <div>
                   <h3 className="text-lg font-serif italic text-slate-900 dark:text-white">

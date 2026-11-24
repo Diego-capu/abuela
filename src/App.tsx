@@ -10,6 +10,8 @@ import { CinemaSection } from './components/CinemaSection';
 import { AvatarsSection } from './components/AvatarsSection';
 import { FooterCTA } from './components/FooterCTA';
 import { EditGeneralModal } from './components/EditGeneralModal';
+import { ImageViewerProvider } from './context/ImageViewerContext';
+import { ImageViewerModal } from './components/ImageViewerModal';
 
 import {
   getStoredSiteConfig,
@@ -112,72 +114,77 @@ export function App(): React.JSX.Element {
   };
 
   return (
-    <div className="relative min-h-screen bg-[#faf8f5] text-[#0f172a] dark:bg-[#070d18] dark:text-[#f1f5f9] font-sans selection:bg-amber-500/20 selection:text-amber-900 dark:selection:bg-amber-500/30 dark:selection:text-amber-200 transition-colors duration-300">
-      {/* Floating Glass Pill Navbar */}
-      <Navbar
-        editMode={editMode}
-        onToggleEditMode={() => setEditMode(!editMode)}
-      />
+    <ImageViewerProvider>
+      <div className="relative min-h-screen bg-[#faf8f5] text-[#0f172a] dark:bg-[#070d18] dark:text-[#f1f5f9] font-sans selection:bg-amber-500/20 selection:text-amber-900 dark:selection:bg-amber-500/30 dark:selection:text-amber-200 transition-colors duration-300">
+        {/* Floating Glass Pill Navbar */}
+        <Navbar
+          editMode={editMode}
+          onToggleEditMode={() => setEditMode(!editMode)}
+        />
 
-      {/* Main Content Sections */}
-      <main>
-        <Hero
-          config={siteConfig}
-          editMode={editMode}
-          onEdit={() => setGeneralModalOpen(true)}
-        />
-        <Manifesto
-          data={manifesto}
-          editMode={editMode}
-          onEdit={() => setGeneralModalOpen(true)}
-        />
-        <Chapters
-          chapters={chapters}
-          editMode={editMode}
-          onUpdateChapters={handleUpdateChapters}
-        />
-        <BentoGrid
-          pillars={pillars}
-          editMode={editMode}
-        />
-        <QuotesSection
-          quotes={quotes}
-          editMode={editMode}
-          onUpdateQuotes={handleUpdateQuotes}
-        />
-        <InteractiveGallery
-          photos={gallery}
-          editMode={editMode}
-          onUpdatePhotos={handleUpdateGallery}
-        />
-        <CinemaSection
-          cinemaConfig={cinema}
-          editMode={editMode}
-          onUpdateCinema={handleUpdateCinema}
-        />
-        <AvatarsSection
-          avatars={avatars}
-          editMode={editMode}
-          onUpdateAvatars={handleUpdateAvatars}
-        />
-      </main>
+        {/* Main Content Sections */}
+        <main>
+          <Hero
+            config={siteConfig}
+            editMode={editMode}
+            onEdit={() => setGeneralModalOpen(true)}
+          />
+          <Manifesto
+            data={manifesto}
+            editMode={editMode}
+            onEdit={() => setGeneralModalOpen(true)}
+          />
+          <Chapters
+            chapters={chapters}
+            editMode={editMode}
+            onUpdateChapters={handleUpdateChapters}
+          />
+          <BentoGrid
+            pillars={pillars}
+            editMode={editMode}
+          />
+          <QuotesSection
+            quotes={quotes}
+            editMode={editMode}
+            onUpdateQuotes={handleUpdateQuotes}
+          />
+          <InteractiveGallery
+            photos={gallery}
+            editMode={editMode}
+            onUpdatePhotos={handleUpdateGallery}
+          />
+          <CinemaSection
+            cinemaConfig={cinema}
+            editMode={editMode}
+            onUpdateCinema={handleUpdateCinema}
+          />
+          <AvatarsSection
+            avatars={avatars}
+            editMode={editMode}
+            onUpdateAvatars={handleUpdateAvatars}
+          />
+        </main>
 
-      {/* Footer & Celebration CTA */}
-      <FooterCTA
-        editMode={editMode}
-        onResetData={handleResetData}
-        onExportData={handleExportData}
-      />
+        {/* Footer & Celebration CTA */}
+        <FooterCTA
+          editMode={editMode}
+          onResetData={handleResetData}
+          onExportData={handleExportData}
+        />
 
-      {/* General Configuration Modal (Hero & Manifesto) */}
-      <EditGeneralModal
-        isOpen={generalModalOpen}
-        onClose={() => setGeneralModalOpen(false)}
-        siteConfig={siteConfig}
-        manifesto={manifesto}
-        onSave={handleSaveGeneral}
-      />
-    </div>
+        {/* General Configuration Modal (Hero & Manifesto) */}
+        <EditGeneralModal
+          isOpen={generalModalOpen}
+          onClose={() => setGeneralModalOpen(false)}
+          siteConfig={siteConfig}
+          manifesto={manifesto}
+          onSave={handleSaveGeneral}
+        />
+
+        {/* Global Real-Size Image Viewer Modal */}
+        <ImageViewerModal />
+      </div>
+    </ImageViewerProvider>
   );
 }
 

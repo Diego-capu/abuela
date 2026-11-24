@@ -8,9 +8,11 @@ import {
   Trash2,
   ChevronLeft,
   ChevronRight,
+  Maximize2,
 } from 'lucide-react';
 import type { GalleryPhoto } from '../data/abuelaData';
 import { GalleryModal } from './GalleryModal';
+import { useImageViewer } from '../context/ImageViewerContext';
 
 interface InteractiveGalleryProps {
   photos: GalleryPhoto[];
@@ -23,10 +25,22 @@ export const InteractiveGallery: React.FC<InteractiveGalleryProps> = ({
   editMode = false,
   onUpdatePhotos,
 }) => {
+  const { openImageViewer } = useImageViewer();
   const [activeCategory, setActiveCategory] = useState<string>('Todas');
   const [selectedPhotoIndex, setSelectedPhotoIndex] = useState<number | null>(null);
   const [modalOpen, setModalOpen] = useState(false);
   const [photoToEdit, setPhotoToEdit] = useState<GalleryPhoto | null>(null);
+
+  const handleOpenRealSize = (photo: GalleryPhoto, e?: React.MouseEvent) => {
+    e?.stopPropagation();
+    openImageViewer({
+      src: photo.imageUrl,
+      alt: photo.title,
+      title: photo.title,
+      subtitle: `${photo.category} • ${photo.date} • ${photo.location}`,
+      caption: photo.caption,
+    });
+  };
 
   const categories = ['Todas', 'Familia', 'Celebraciones', 'Retratos', 'Años Dorados'];
 
@@ -131,14 +145,15 @@ export const InteractiveGallery: React.FC<InteractiveGalleryProps> = ({
           >
             {/* Image Container with Aspect Ratio */}
             <div
-              onClick={() => setSelectedPhotoIndex(index)}
-              className={`relative overflow-hidden bg-slate-900 cursor-pointer ${
+              onClick={() => handleOpenRealSize(photo)}
+              className={`relative overflow-hidden bg-slate-900 cursor-zoom-in ${
                 photo.aspect === 'portrait'
                   ? 'aspect-[3/4]'
                   : photo.aspect === 'square'
                   ? 'aspect-square'
                   : 'aspect-[4/3]'
               }`}
+              title="Toca para ver en tamaño real"
             >
               <img
                 src={photo.imageUrl}
@@ -147,8 +162,9 @@ export const InteractiveGallery: React.FC<InteractiveGalleryProps> = ({
                 loading="lazy"
               />
               <div className="absolute inset-0 bg-gradient-to-t from-black/70 via-black/20 to-transparent opacity-0 group-hover:opacity-100 transition-opacity flex flex-col justify-between p-2.5 sm:p-3 text-white">
-                <div className="self-end p-1.5 rounded-full bg-black/40 backdrop-blur-xs">
-                  <ZoomIn className="w-3.5 h-3.5" />
+                <div className="self-end p-1.5 rounded-full bg-black/60 backdrop-blur-xs flex items-center gap-1 text-[10px]">
+                  <ZoomIn className="w-3.5 h-3.5 text-amber-300" />
+                  <span className="hidden sm:inline">Tamaño real</span>
                 </div>
                 <div>
                   <p className="text-[11px] font-semibold line-clamp-1">{photo.title}</p>
@@ -158,7 +174,10 @@ export const InteractiveGallery: React.FC<InteractiveGalleryProps> = ({
             </div>
 
             {/* Bottom Caption Card */}
-            <div className="p-2.5 sm:p-3 flex flex-col justify-between flex-1">
+            <div
+              onClick={() => setSelectedPhotoIndex(index)}
+              className="p-2.5 sm:p-3 flex flex-col justify-between flex-1 cursor-pointer"
+            >
               <div>
                 <div className="flex items-center justify-between text-[10px] text-amber-700 dark:text-amber-400 mb-1">
                   <span className="font-semibold uppercase tracking-wider">{photo.category}</span>
@@ -227,12 +246,20 @@ export const InteractiveGallery: React.FC<InteractiveGalleryProps> = ({
               exit={{ opacity: 0, scale: 0.92 }}
               className="relative max-w-3xl w-full max-h-[90vh] flex flex-col rounded-3xl liquid-glass border border-amber-300/80 dark:border-amber-400/30 overflow-hidden shadow-2xl bg-slate-900/90 text-white"
             >
-              <div className="relative flex-1 min-h-[300px] sm:min-h-[450px] bg-black flex items-center justify-center overflow-hidden">
+              <div
+                onClick={(e) => handleOpenRealSize(selectedPhoto, e)}
+                className="relative flex-1 min-h-[300px] sm:min-h-[450px] bg-black flex items-center justify-center overflow-hidden cursor-zoom-in group"
+                title="Toca para ver la foto en tamaño real 100%"
+              >
                 <img
                   src={selectedPhoto.imageUrl}
                   alt={selectedPhoto.title}
-                  className="max-h-[65vh] w-auto object-contain"
+                  className="max-h-[65vh] w-auto object-contain group-hover:scale-105 transition-transform duration-300"
                 />
+                <div className="absolute bottom-4 right-4 p-2 rounded-xl bg-black/60 hover:bg-amber-500 text-white text-xs flex items-center gap-1.5 backdrop-blur-md shadow-lg transition-colors">
+                  <Maximize2 className="w-3.5 h-3.5" />
+                  <span>Tamaño real</span>
+                </div>
               </div>
 
               <div className="p-4 sm:p-6 bg-slate-900/95 border-t border-white/10">

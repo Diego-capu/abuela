@@ -1,7 +1,8 @@
 import React from 'react';
 import { motion } from 'framer-motion';
-import { Compass, Heart, Edit2 } from 'lucide-react';
+import { Compass, Heart, Edit2, ZoomIn } from 'lucide-react';
 import type { SITE_CONFIG } from '../data/abuelaData';
+import { useImageViewer } from '../context/ImageViewerContext';
 
 interface HeroProps {
   config: typeof SITE_CONFIG;
@@ -10,6 +11,17 @@ interface HeroProps {
 }
 
 export const Hero: React.FC<HeroProps> = ({ config, editMode, onEdit }) => {
+  const { openImageViewer } = useImageViewer();
+
+  const handleOpenPhoto = () => {
+    openImageViewer({
+      src: config.heroPhoto,
+      alt: config.abuelaName,
+      title: config.fullName,
+      subtitle: 'Foto de Portada • ' + config.abuelaName,
+      caption: config.heroSubheadline,
+    });
+  };
   return (
     <section
       id="inicio"
@@ -61,7 +73,11 @@ export const Hero: React.FC<HeroProps> = ({ config, editMode, onEdit }) => {
           {/* Animated Halo Rings */}
           <div className="absolute -inset-3 sm:-inset-4 rounded-3xl bg-gradient-to-r from-amber-500/30 via-orange-400/20 to-yellow-400/30 blur-xl opacity-75 group-hover:opacity-100 transition-opacity duration-500 animate-pulse" />
           
-          <div className="relative rounded-2xl sm:rounded-3xl p-2 liquid-glass border border-amber-300/80 dark:border-amber-400/30 shadow-2xl overflow-hidden max-w-[280px] sm:max-w-[340px] md:max-w-[380px]">
+          <div
+            onClick={handleOpenPhoto}
+            className="relative rounded-2xl sm:rounded-3xl p-2 liquid-glass border border-amber-300/80 dark:border-amber-400/30 shadow-2xl overflow-hidden max-w-[280px] sm:max-w-[340px] md:max-w-[380px] cursor-zoom-in"
+            title="Toca para ver la foto en tamaño real"
+          >
             <div className="relative aspect-[4/5] rounded-xl sm:rounded-2xl overflow-hidden bg-slate-100 dark:bg-slate-900">
               <img
                 src={config.heroPhoto}
@@ -70,6 +86,12 @@ export const Hero: React.FC<HeroProps> = ({ config, editMode, onEdit }) => {
                 loading="eager"
               />
               <div className="absolute inset-0 bg-gradient-to-t from-slate-950/60 via-transparent to-transparent pointer-events-none" />
+
+              {/* Hover Zoom Icon Badge */}
+              <div className="absolute top-3 left-3 p-1.5 rounded-full bg-black/50 text-white opacity-0 group-hover:opacity-100 transition-opacity backdrop-blur-md shadow-md pointer-events-none flex items-center gap-1 text-[11px]">
+                <ZoomIn className="w-3.5 h-3.5 text-amber-300" />
+                <span className="pr-1">Tamaño real</span>
+              </div>
               
               {/* Photo Caption Overlay */}
               <div className="absolute bottom-3 inset-x-3 text-left text-white drop-shadow-md">

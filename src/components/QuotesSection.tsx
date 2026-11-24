@@ -9,6 +9,7 @@ import {
 } from 'lucide-react';
 import type { Quote } from '../data/abuelaData';
 import { QuoteModal } from './QuoteModal';
+import { useImageViewer } from '../context/ImageViewerContext';
 
 interface QuotesSectionProps {
   quotes: Quote[];
@@ -21,8 +22,20 @@ export const QuotesSection: React.FC<QuotesSectionProps> = ({
   editMode = false,
   onUpdateQuotes,
 }) => {
+  const { openImageViewer } = useImageViewer();
   const [selectedCategory, setSelectedCategory] = useState<string>('Todas');
   const [activeQuote, setActiveQuote] = useState<Quote | null>(null);
+
+  const handleOpenRealSize = (quote: Quote, e?: React.MouseEvent) => {
+    e?.stopPropagation();
+    openImageViewer({
+      src: quote.imageUrl,
+      alt: quote.author,
+      title: quote.title,
+      subtitle: `${quote.author} • ${quote.category}`,
+      caption: `«${quote.quote}» — ${quote.context}`,
+    });
+  };
   const [modalOpen, setModalOpen] = useState(false);
   const [quoteToEdit, setQuoteToEdit] = useState<Quote | null>(null);
 
@@ -156,8 +169,9 @@ export const QuotesSection: React.FC<QuotesSectionProps> = ({
             <div className="mt-5 pt-3 border-t border-amber-200/40 dark:border-white/10 flex items-center justify-between">
               <div className="flex items-center gap-2.5">
                 <div
-                  onClick={() => setActiveQuote(q)}
-                  className="w-10 h-10 rounded-full overflow-hidden bg-slate-200 dark:bg-slate-800 border border-amber-300 cursor-pointer hover:scale-105 transition-transform"
+                  onClick={(e) => handleOpenRealSize(q, e)}
+                  className="w-10 h-10 rounded-full overflow-hidden bg-slate-200 dark:bg-slate-800 border border-amber-300 cursor-zoom-in hover:scale-105 transition-transform"
+                  title="Toca para ver la foto en tamaño real"
                 >
                   <img src={q.imageUrl} alt={q.author} className="w-full h-full object-cover" />
                 </div>
@@ -200,12 +214,22 @@ export const QuotesSection: React.FC<QuotesSectionProps> = ({
                 <X className="w-5 h-5" />
               </button>
 
-              <div className="relative aspect-[4/3] rounded-2xl overflow-hidden mb-4 bg-slate-900">
+              <div
+                onClick={(e) => handleOpenRealSize(activeQuote, e)}
+                className="relative aspect-[4/3] rounded-2xl overflow-hidden mb-4 bg-slate-900 group cursor-zoom-in"
+                title="Toca para ver la foto en tamaño real 100%"
+              >
                 <img
                   src={activeQuote.imageUrl}
                   alt={activeQuote.title}
-                  className="w-full h-full object-cover"
+                  className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-300"
                 />
+                <div className="absolute inset-0 bg-black/40 opacity-0 group-hover:opacity-100 transition-opacity flex items-center justify-center pointer-events-none">
+                  <span className="px-3.5 py-1.5 rounded-full bg-black/75 text-white text-xs flex items-center gap-1.5 shadow-xl border border-white/20">
+                    <ZoomIn className="w-4 h-4 text-amber-300" />
+                    <span>Ver en tamaño real</span>
+                  </span>
+                </div>
               </div>
 
               <span className="text-xs uppercase font-semibold text-amber-600 dark:text-amber-400">

@@ -8,9 +8,11 @@ import {
   Pencil,
   Trash2,
   Plus,
+  ZoomIn,
 } from 'lucide-react';
 import type { Chapter } from '../data/abuelaData';
 import { ChapterModal } from './ChapterModal';
+import { useImageViewer } from '../context/ImageViewerContext';
 
 interface ChaptersProps {
   chapters: Chapter[];
@@ -23,9 +25,21 @@ export const Chapters: React.FC<ChaptersProps> = ({
   editMode = false,
   onUpdateChapters,
 }) => {
+  const { openImageViewer } = useImageViewer();
   const [selectedChapter, setSelectedChapter] = useState<Chapter | null>(null);
   const [modalOpen, setModalOpen] = useState(false);
   const [chapterToEdit, setChapterToEdit] = useState<Chapter | null>(null);
+
+  const handleOpenPhoto = (chapter: Chapter, e?: React.MouseEvent) => {
+    e?.stopPropagation();
+    openImageViewer({
+      src: chapter.imageUrl,
+      alt: chapter.title,
+      title: chapter.title,
+      subtitle: `${chapter.tag} • ${chapter.date} • ${chapter.location}`,
+      caption: chapter.story,
+    });
+  };
 
   const handleEdit = (chapter: Chapter) => {
     setChapterToEdit(chapter);
@@ -116,19 +130,35 @@ export const Chapters: React.FC<ChaptersProps> = ({
 
                     {/* Image Preview */}
                     <div
-                      onClick={() => setSelectedChapter(chapter)}
-                      className="relative aspect-video sm:aspect-[16/10] rounded-2xl overflow-hidden bg-slate-100 dark:bg-slate-900 my-3.5 cursor-pointer group-hover:brightness-105 transition-all"
+                      className="relative aspect-video sm:aspect-[16/10] rounded-2xl overflow-hidden bg-slate-100 dark:bg-slate-900 my-3.5 group/img"
                     >
                       <img
                         src={chapter.imageUrl}
                         alt={chapter.title}
-                        className="w-full h-full object-cover transform transition-transform duration-500 group-hover:scale-105"
+                        onClick={(e) => handleOpenPhoto(chapter, e)}
+                        className="w-full h-full object-cover transform transition-transform duration-500 group-hover/img:scale-105 cursor-zoom-in"
                         loading="lazy"
+                        title="Toca para ver en tamaño real"
                       />
-                      <div className="absolute inset-0 bg-gradient-to-t from-black/50 via-transparent to-transparent opacity-0 group-hover:opacity-100 transition-opacity flex items-end p-3">
+
+                      {/* Floating Zoom Button */}
+                      <button
+                        onClick={(e) => handleOpenPhoto(chapter, e)}
+                        className="absolute top-2.5 right-2.5 p-1.5 rounded-full bg-black/60 hover:bg-amber-500 text-white transition-all shadow-md cursor-pointer flex items-center gap-1 text-[11px] z-10"
+                        title="Ver foto en tamaño real"
+                      >
+                        <ZoomIn className="w-3.5 h-3.5 text-amber-300" />
+                        <span className="hidden sm:inline pr-1">Tamaño real</span>
+                      </button>
+
+                      {/* Detail overlay link */}
+                      <div
+                        onClick={() => setSelectedChapter(chapter)}
+                        className="absolute inset-x-0 bottom-0 bg-gradient-to-t from-black/60 via-black/20 to-transparent opacity-0 group-hover/img:opacity-100 transition-opacity flex items-end p-3 cursor-pointer"
+                      >
                         <span className="text-white text-xs flex items-center gap-1">
                           <BookOpen className="w-3.5 h-3.5" />
-                          Toca para ver historia completa
+                          Ver historia completa
                         </span>
                       </div>
                     </div>
@@ -208,12 +238,22 @@ export const Chapters: React.FC<ChaptersProps> = ({
                 <X className="w-5 h-5" />
               </button>
 
-              <div className="relative aspect-video rounded-2xl overflow-hidden mb-5 bg-slate-900 shadow-md">
+              <div
+                onClick={(e) => handleOpenPhoto(selectedChapter, e)}
+                className="relative aspect-video rounded-2xl overflow-hidden mb-5 bg-slate-900 shadow-md group cursor-zoom-in"
+                title="Toca para ver la foto en tamaño real completo"
+              >
                 <img
                   src={selectedChapter.imageUrl}
                   alt={selectedChapter.title}
-                  className="w-full h-full object-cover"
+                  className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500"
                 />
+                <div className="absolute inset-0 bg-black/40 opacity-0 group-hover:opacity-100 transition-opacity flex items-center justify-center pointer-events-none">
+                  <span className="px-3.5 py-1.5 rounded-full bg-black/75 text-white text-xs flex items-center gap-1.5 shadow-xl border border-white/20">
+                    <ZoomIn className="w-4 h-4 text-amber-300" />
+                    <span>Ver en tamaño real</span>
+                  </span>
+                </div>
               </div>
 
               <div className="flex items-center gap-3 text-xs text-amber-700 dark:text-amber-300 font-semibold mb-2">
