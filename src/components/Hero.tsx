@@ -1,6 +1,6 @@
 import React from 'react';
 import { motion } from 'framer-motion';
-import { Compass, Heart, Edit2, ZoomIn } from 'lucide-react';
+import { Compass, Edit2, ZoomIn } from 'lucide-react';
 import type { SITE_CONFIG } from '../data/abuelaData';
 import { useImageViewer } from '../context/ImageViewerContext';
 
@@ -116,17 +116,6 @@ export const Hero: React.FC<HeroProps> = ({ config, editMode, onEdit }) => {
               </button>
             )}
           </div>
-        </motion.div>
-
-        {/* Crew / Family Badge */}
-        <motion.div
-          initial={{ opacity: 0 }}
-          animate={{ opacity: 1 }}
-          transition={{ duration: 0.7, delay: 0.5 }}
-          className="mt-6 flex items-center gap-2 text-xs text-slate-600 dark:text-slate-400 bg-white/70 dark:bg-white/5 py-1.5 px-4 rounded-full border border-amber-200/50 dark:border-white/10"
-        >
-          <Heart className="w-3.5 h-3.5 text-rose-500 fill-rose-500" />
-          <span>{config.crewBadge}</span>
         </motion.div>
       </div>
     </section>
