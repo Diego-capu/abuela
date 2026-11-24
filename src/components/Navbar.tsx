@@ -1,8 +1,7 @@
 import React, { useState, useEffect } from 'react';
-import { Clock, Edit3, Check } from 'lucide-react';
+import { Edit3, Check } from 'lucide-react';
 import { AudioPlayer } from './AudioPlayer';
 import { ThemeToggle } from './ThemeToggle';
-import { Saturn02Icon } from './Saturn02Icon';
 
 interface NavbarProps {
   editMode?: boolean;
@@ -32,16 +31,14 @@ export const Navbar: React.FC<NavbarProps> = ({ editMode = false, onToggleEditMo
         {/* Brand Logo */}
         <a
           href="#inicio"
-          className="flex items-center gap-1.5 group shrink-0"
+          className="flex items-center gap-2 group shrink-0"
           aria-label="Inicio — Abuela Kata"
         >
-          <div className="relative">
-            <Saturn02Icon
-              size={22}
-              className="text-[#d97706] dark:text-[#fbbf24] transition-transform duration-300 group-hover:rotate-45"
-            />
-            <Clock className="w-2.5 h-2.5 text-amber-600 dark:text-amber-300 absolute -top-0.5 -right-0.5 animate-pulse" />
-          </div>
+          <img
+            src="/logo.png"
+            alt="Logo Feliz Cumpleaños Abuela Kata"
+            className="w-7 h-7 sm:w-8 sm:h-8 object-contain transition-transform duration-300 group-hover:scale-110 drop-shadow-sm"
+          />
           <span className="font-hand normal-case text-base sm:text-lg font-semibold tracking-wide text-slate-900 dark:text-white group-hover:text-[#d97706] dark:group-hover:text-[#fbbf24] transition-colors">
             Abuela Kata
           </span>
